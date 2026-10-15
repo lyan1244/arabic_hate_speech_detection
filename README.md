@@ -5,6 +5,9 @@ TF-IDF + Logistic Regression baseline on the same held-out test set, and served 
 
 > **Content warning:** the dataset and the error analysis contain offensive and hateful Arabic text.
 
+## This project was for SDAIA Academy Applied NLP Engineering bootcamp 
+https://github.com/SDAIAAcademy
+
 ---
 
 ## 1. Problem
@@ -101,7 +104,11 @@ python -m src.predict "شكرا لك"   # one-off prediction with the saved mode
 python -m src.app                # Gradio demo
 ```
 
+
 Set `PROJECT_OUT=/some/folder` before running to change where `artifacts/` and `results/` are written.
 
 Quick logic tests (no GPU, no dataset access): `python -m pytest tests`
+
+
+
 
