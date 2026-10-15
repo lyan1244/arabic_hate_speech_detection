@@ -5,7 +5,7 @@ TF-IDF + Logistic Regression baseline on the same held-out test set, and served 
 
 > **Content warning:** the dataset and the error analysis contain offensive and hateful Arabic text.
 
-## This project was for SDAIA Academy Applied NLP Engineering bootcamp 
+This project was for SDAIA Academy Applied NLP Engineering bootcamp 
 https://github.com/SDAIAAcademy
 
 ---
