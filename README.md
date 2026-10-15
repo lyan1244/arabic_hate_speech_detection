@@ -40,7 +40,7 @@ HF dataset -> clean + dedup -> stratified split -> undersample TRAIN only
           -> AraBERT preprocessing + tokenization (max 128 tokens; median length 20)
           -> fine-tune AraBERT (2 epochs) -> pick best epoch on validation macro-F1
           -> tune decision threshold on VALIDATION, freeze it -> evaluate once on TEST
-          -> error analysis -> Gradio demo
+           -> Gradio demo
 ```
 
 | Component | Choice |
@@ -66,36 +66,8 @@ Test set: 44,763 texts (1,651 hate). The same split, features, and threshold pro
 | AraBERT | 0.50 | 0.8410 | 0.6024 | 0.1760 | 0.8995 | 0.2944 | 0.9392 | 0.4774 |
 | **AraBERT** | **0.947 (val-tuned)** | **0.9637** | **0.7380** | **0.5083** | **0.4821** | **0.4949** | **0.9392** | **0.4774** |
 
-Raw files: [`results/baseline_comparison.csv`](results/baseline_comparison.csv), [`results/classification_report.txt`](results/classification_report.txt).
 
-How to read this:
-
-- With a tuned threshold, AraBERT beats the baseline on macro-F1 (0.738 vs 0.694) and hate F1 (0.495 vs 0.415), mainly through higher precision (0.51 vs 0.36) at similar recall.
-- The threshold-free metrics agree in direction: average precision for the hate class is 0.477 vs 0.360, and ROC-AUC is 0.939 vs 0.929.
-  The ROC-AUC gap is small, and this is a single run with one seed and no confidence intervals, so treat the size of the gap with caution.
-- At the default 0.5 threshold, AraBERT is *not* better on macro-F1 (0.602 vs 0.628). The improvement only appears once the decision threshold is calibrated for the real 3.7% base rate.
-- The task is still hard: at the chosen threshold, about half of the hate speech in the test set is missed (recall 0.48) and about half of the flagged texts are not labeled hate (precision 0.51).
-- Validation: the best checkpoint was epoch 2 (validation macro-F1 0.6046 at threshold 0.5; ROC-AUC 0.9395).
-
-![Confusion matrix](results/confusion_matrix.png)
-
-## 5. Error analysis
-
-At the tuned threshold the model makes 3,285 errors on the test set: 1,700 false positives and 1,585 false negatives.
-`error_analysis.csv` holds a **random sample of 15 false positives and 15 false negatives** (not cherry-picked), with simple automatic hints
-(very short text, negation marker, character elongation, Latin letters, mention/URL, high-confidence error).
-
-<!-- TODO before submitting: open results/error_analysis.csv, read at least 10 failures, fill the human_review_category column,
-     then replace this table with your real counts and one example per category (avoid pasting slurs; shorten or mask them). -->
-
-| Category (assigned by manual review) | Type | Count (of 30 sampled) | What happens |
-|---|---|---|---|
-| TODO e.g. insult without a protected target | FP | TODO | TODO |
-| TODO e.g. dialect / spelling variation | FN | TODO | TODO |
-| TODO e.g. sarcasm or indirect meaning | FN | TODO | TODO |
-| TODO e.g. annotation inconsistency | FP/FN | TODO | TODO |
-
-## 6. Demo
+## 5. Demo
 
 A Gradio app takes Arabic text and shows the predicted label, the probabilities, and the decision threshold.
 
@@ -107,7 +79,7 @@ python -m src.app          # needs the trained model in artifacts/ (see "How to 
 
 Sample inputs and outputs are in [`examples/`](examples/sample_outputs.md).
 
-## 7. How to run
+## 6. How to run
 
 ### Option A: Google Colab (recommended)
 
@@ -131,35 +103,5 @@ python -m src.app                # Gradio demo
 
 Set `PROJECT_OUT=/some/folder` before running to change where `artifacts/` and `results/` are written.
 
-Model weights (~540 MB) are not stored in git. <!-- TODO: add a Hugging Face Hub or Drive link to the trained model folder -->
-
 Quick logic tests (no GPU, no dataset access): `python -m pytest tests`
 
-## 8. Repository structure
-
-```
-src/
-  config.py            paths, model name, hyper-parameters
-  data_preparation.py  load, clean, dedup, split, undersample, tokenize
-  train.py             Trainer setup, saving artifacts, end-to-end main()
-  evaluate.py          metrics, threshold tuning, error table, model card
-  baseline.py          TF-IDF + Logistic Regression and the comparison table
-  predict.py           HateSpeechClassifier for inference
-  app.py               Gradio demo
-notebooks/             Colab notebook that runs the whole pipeline
-results/               metrics, comparison table, classification report, confusion matrix, error sample
-examples/              sample inputs and outputs
-tests/                 fast logic tests on synthetic data
-```
-
-## 9. Limitations and responsible use
-
-- **Annotation noise and source bias:** the superset mixes corpora with different guidelines, and one corpus dominates. Results were not broken down per source or per dialect.
-- **Context:** sarcasm, quotation, religious or political discussion, and dialectal spelling are hard; short texts carry little context.
-- **Calibration:** probabilities are not calibrated because of undersampling; use the tuned threshold, not 0.5.
-- **Single run:** one seed, no confidence intervals, no cross-validation.
-- **Use:** this is a research and course project. Predictions are not definitive judgments and must not be used for automated enforcement without human review.
-
-## 10. Acknowledgements
-
-Base model: [AraBERT](https://github.com/aub-mind/arabert) (AUB MIND Lab). Dataset: `manueltonneau/arabic-hate-speech-superset` and the original corpora it aggregates.
